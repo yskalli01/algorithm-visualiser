@@ -5,7 +5,11 @@ import {
   Alert,
   Box,
   Button,
+  Card,
+  CardContent,
   Chip,
+  Container,
+  Divider,
   FormControl,
   InputLabel,
   MenuItem,
@@ -290,58 +294,186 @@ export default function PathfindingVisualizer() {
 
   return (
     <Box>
-      <Typography variant="h5" sx={{ fontWeight: 700, textAlign: "center", mb: 2 }}>
+      <Typography variant="h5" sx={{ fontWeight: 700, textAlign: "center", mb: 1 }}>
         Pathfinding Visualizer
       </Typography>
 
-      <Paper sx={{ p: 3, borderRadius: 4, mb: 3 }}>
-        <Stack sx={{ flexDirection: "row", gap: 2, flexWrap: "wrap", alignItems: "center" }}>
-          <FormControl sx={{ minWidth: 220 }}>
-            <InputLabel>Algorithm</InputLabel>
-            <Select value={algorithm} label="Algorithm" disabled={isRunning} onChange={(e) => setAlgorithm(e.target.value as PathfindingAlgorithm)}>
-              <MenuItem value="bfs">BFS</MenuItem>
-              <MenuItem value="dfs">DFS</MenuItem>
-              <MenuItem value="dijkstra">Dijkstra</MenuItem>
-              <MenuItem value="astar">A*</MenuItem>
-            </Select>
-          </FormControl>
+      <Typography component="p" variant="body1" color="text.secondary" sx={{ textAlign: "center", mb: 3 }}>
+        Build walls, move the start/end nodes, and compare graph-search algorithms step by step.
+      </Typography>
 
-          <Button variant="contained" disabled={isRunning} onClick={runPathfinding}>Run {pathfindingInfo[algorithm].name}</Button>
-          {isRunning && <Button variant="contained" color="secondary" onClick={togglePause}>{isPaused ? "Resume" : "Pause"}</Button>}
-          <Button variant="outlined" disabled={isRunning && !isPaused} onClick={stepBackward}>Step Backward</Button>
-          <Button variant="outlined" disabled={isRunning && !isPaused} onClick={stepForward}>Step Forward</Button>
-          <Button variant="outlined" onClick={() => setDrawerOpen(true)}>Explanation</Button>
-          <Button variant="outlined" disabled={isRunning && !isPaused} onClick={clearPathOnly}>Clear Path Only</Button>
-          <Button variant="outlined" color="error" onClick={clearGrid}>Clear Grid</Button>
-        </Stack>
+      <Card
+        variant="outlined"
+        sx={{
+          width: "100%",
+          mb: 3,
+          borderRadius: 5,
+          bgcolor: "background.paper",
+          borderColor: "divider",
+        }}
+      >
+        <CardContent sx={{ p: { xs: 2, md: 3 } }}>
+          <Stack
+            sx={{
+              flexDirection: { xs: "column", md: "row" },
+              justifyContent: "space-between",
+              alignItems: { xs: "stretch", md: "center" },
+              gap: 2,
+              mb: 2,
+            }}
+          >
+            <Box>
+              <Typography variant="overline" color="primary" sx={{ fontWeight: 800 }}>
+                Pathfinding controls
+              </Typography>
+              <Typography variant="h6" sx={{ fontWeight: 800 }}>
+                {pathfindingInfo[algorithm].name}
+              </Typography>
+            </Box>
 
-        <Typography sx={{ mt: 3 }}>Speed: {speed}ms</Typography>
-        <Slider value={speed} min={5} max={120} step={5} disabled={isRunning && !isPaused} onChange={(_, value) => setSpeed(value as number)} />
+            <Chip
+              label={isRunning ? (isPaused ? "Paused" : "Running") : "Ready"}
+              color={isRunning ? (isPaused ? "warning" : "success") : "default"}
+              variant="outlined"
+            />
+          </Stack>
 
-        <Stack sx={{ flexDirection: { xs: "column", md: "row" }, gap: 3, mt: 2 }}>
-          <Box sx={{ flex: 1 }}>
-            <Typography>Rows: {rowCount}</Typography>
-            <Slider value={rowCount} min={8} max={25} step={1} disabled={isRunning && !isPaused} onChange={(_, value) => resizeGrid(value as number, colCount)} />
-          </Box>
-          <Box sx={{ flex: 1 }}>
-            <Typography>Columns: {colCount}</Typography>
-            <Slider value={colCount} min={12} max={50} step={1} disabled={isRunning && !isPaused} onChange={(_, value) => resizeGrid(rowCount, value as number)} />
-          </Box>
-        </Stack>
+          <Stack
+            sx={{
+              flexDirection: "row",
+              gap: 1.5,
+              flexWrap: "wrap",
+              alignItems: "center",
+              mb: 2,
+            }}
+          >
+            <FormControl sx={{ minWidth: 220 }} size="small">
+              <InputLabel>Algorithm</InputLabel>
+              <Select
+                value={algorithm}
+                label="Algorithm"
+                disabled={isRunning}
+                onChange={(e) => setAlgorithm(e.target.value as PathfindingAlgorithm)}
+              >
+                <MenuItem value="bfs">BFS</MenuItem>
+                <MenuItem value="dfs">DFS</MenuItem>
+                <MenuItem value="dijkstra">Dijkstra</MenuItem>
+                <MenuItem value="astar">A*</MenuItem>
+              </Select>
+            </FormControl>
 
-        <Stack sx={{ flexDirection: "row", gap: 1, flexWrap: "wrap", mt: 2 }}>
-          <Chip label={`Visited: ${visitedCount}`} />
-          <Chip label={`Path nodes: ${pathLength}`} />
-          <Chip label={`Frame: ${frameIndex}/${frames.length}`} />
-        </Stack>
+            <Button variant="contained" disabled={isRunning} onClick={runPathfinding}>
+              Run {pathfindingInfo[algorithm].name}
+            </Button>
 
-        <Alert severity={status.startsWith("No path") ? "warning" : "info"} sx={{ mt: 2 }}>{status}</Alert>
-        <AlgorithmInfoCard info={pathfindingInfo[algorithm]} />
-      </Paper>
+            {isRunning && (
+              <Button variant="contained" color="secondary" onClick={togglePause}>
+                {isPaused ? "Resume" : "Pause"}
+              </Button>
+            )}
 
-      <Paper sx={{ p: 3, borderRadius: 4, overflowX: "auto" }}>
+            <Button variant="outlined" disabled={isRunning && !isPaused} onClick={stepBackward}>
+              Step Backward
+            </Button>
+
+            <Button variant="outlined" disabled={isRunning && !isPaused} onClick={stepForward}>
+              Step Forward
+            </Button>
+
+            <Button variant="outlined" onClick={() => setDrawerOpen(true)}>
+              Explanation
+            </Button>
+
+            <Button variant="outlined" disabled={isRunning && !isPaused} onClick={clearPathOnly}>
+              Clear Path Only
+            </Button>
+
+            <Button variant="outlined" color="error" onClick={clearGrid}>
+              Clear Grid
+            </Button>
+          </Stack>
+
+          <Divider sx={{ my: 2 }} />
+
+          <Stack sx={{ flexDirection: { xs: "column", md: "row" }, gap: 3 }}>
+            <Box sx={{ flex: 1 }}>
+              <Typography gutterBottom sx={{ fontWeight: 700 }}>
+                Speed: {speed}ms
+              </Typography>
+              <Slider
+                value={speed}
+                min={5}
+                max={120}
+                step={5}
+                disabled={isRunning && !isPaused}
+                onChange={(_, value) => setSpeed(value as number)}
+              />
+            </Box>
+
+            <Box sx={{ flex: 1 }}>
+              <Typography gutterBottom sx={{ fontWeight: 700 }}>
+                Rows: {rowCount}
+              </Typography>
+              <Slider
+                value={rowCount}
+                min={8}
+                max={25}
+                step={1}
+                disabled={isRunning && !isPaused}
+                onChange={(_, value) => resizeGrid(value as number, colCount)}
+              />
+            </Box>
+
+            <Box sx={{ flex: 1 }}>
+              <Typography gutterBottom sx={{ fontWeight: 700 }}>
+                Columns: {colCount}
+              </Typography>
+              <Slider
+                value={colCount}
+                min={12}
+                max={50}
+                step={1}
+                disabled={isRunning && !isPaused}
+                onChange={(_, value) => resizeGrid(rowCount, value as number)}
+              />
+            </Box>
+          </Stack>
+
+          <Stack sx={{ flexDirection: "row", gap: 1, flexWrap: "wrap", mt: 2 }}>
+            <Chip label={`Visited: ${visitedCount}`} variant="outlined" />
+            <Chip label={`Path nodes: ${pathLength}`} variant="outlined" />
+            <Chip label={`Frame: ${frameIndex}/${frames.length}`} variant="outlined" />
+          </Stack>
+
+          <Alert severity={status.startsWith("No path") ? "warning" : "info"} sx={{ mt: 2 }}>
+            {status}
+          </Alert>
+        </CardContent>
+      </Card>
+
+      <Paper elevation={0}
+          sx={{
+            mt: 3,
+            p: { xs: 2, md: 3 },
+            borderRadius: 5,
+            border: "1px solid",
+            borderColor: "divider",
+            bgcolor: "background.paper",
+          }}>
         <Legend items={[{ label: "Start", color: "#2e7d32" }, { label: "End", color: "#d32f2f" }, { label: "Wall", color: "#212121" }, { label: "Visited", color: "#0288d1" }, { label: "Path", color: "#ed6c02" }]} />
         <PathfindingGrid grid={grid} onNodeMouseDown={handleNodeMouseDown} onNodeMouseEnter={handleNodeMouseEnter} onMouseUp={handleMouseUp} />
+      </Paper>
+
+      <Paper elevation={0}
+          sx={{
+            mt: 3,
+            p: { xs: 2, md: 3 },
+            borderRadius: 5,
+            border: "1px solid",
+            borderColor: "divider",
+            bgcolor: "background.paper",
+          }}>
+        <AlgorithmInfoCard info={pathfindingInfo[algorithm]} />
       </Paper>
 
       <AlgorithmExplanationDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} info={pathfindingInfo[algorithm]} />

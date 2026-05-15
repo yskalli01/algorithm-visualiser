@@ -5,7 +5,11 @@ import {
   Alert,
   Box,
   Button,
+  Card,
+  CardContent,
   Chip,
+  Container,
+  Divider,
   FormControl,
   InputLabel,
   MenuItem,
@@ -277,113 +281,208 @@ export default function BacktrackingVisualizer() {
 
   return (
     <Box>
-      <Typography variant="h5" sx={{ fontWeight: 700, textAlign: "center", mb: 2 }}>
+      <Typography variant="h5" sx={{ fontWeight: 700, textAlign: "center", mb: 1 }}>
         Backtracking Visualizer
       </Typography>
 
-      <Paper sx={{ p: 3, borderRadius: 4, mb: 3 }}>
-        <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mb: 3 }}>
-          <FormControl sx={{ minWidth: 220 }}>
-            <InputLabel>Algorithm</InputLabel>
+      <Typography component="p" variant="body1" color="text.secondary" sx={{ textAlign: "center", mb: 3 }}>
+        Watch recursive decisions, dead ends, and backtracking steps as they happen.
+      </Typography>
 
-            <Select
-              value={algorithm}
-              label="Algorithm"
-              disabled={isRunning}
-              onChange={(e) => {
-                const nextAlgorithm = e.target.value as "nqueens" | "maze";
-                setAlgorithm(nextAlgorithm);
-                setStatus("Choose an algorithm and press Run.");
-                setStepIndex(0);
-                setTotalSteps(0);
-                setChecks(0);
-                setBacktracks(0);
-                setQueenSteps([]);
-                setMazeSteps([]);
-              }}
-            >
-              <MenuItem value="nqueens">N-Queens</MenuItem>
-              <MenuItem value="maze">Maze Solver</MenuItem>
-            </Select>
-          </FormControl>
-
-          <Button
-            variant="contained"
-            disabled={isRunning}
-            onClick={algorithm === "nqueens" ? runNQueens : runMazeSolver}
+      <Card
+        variant="outlined"
+        sx={{
+          width: "100%",
+          mb: 3,
+          borderRadius: 5,
+          bgcolor: "background.paper",
+          borderColor: "divider",
+        }}
+      >
+        <CardContent sx={{ p: { xs: 2, md: 3 } }}>
+          <Stack
+            sx={{
+              flexDirection: { xs: "column", md: "row" },
+              justifyContent: "space-between",
+              alignItems: { xs: "stretch", md: "center" },
+              gap: 2,
+              mb: 2,
+            }}
           >
-            Run {algorithm === "nqueens" ? "N-Queens" : "Maze Solver"}
-          </Button>
+            <Box>
+              <Typography variant="overline" color="primary" sx={{ fontWeight: 800 }}>
+                Backtracking controls
+              </Typography>
+              <Typography variant="h6" sx={{ fontWeight: 800 }}>
+                {algorithm === "nqueens" ? "N-Queens" : "Maze Solver"}
+              </Typography>
+            </Box>
 
-          {isRunning && (
-            <Button variant="contained" color="secondary" onClick={togglePause}>
-              {isPaused ? "Resume" : "Pause"}
+            <Chip
+              label={isRunning ? (isPaused ? "Paused" : "Running") : "Ready"}
+              color={isRunning ? (isPaused ? "warning" : "success") : "default"}
+              variant="outlined"
+            />
+          </Stack>
+
+          <Stack
+            sx={{
+              flexDirection: "row",
+              gap: 1.5,
+              flexWrap: "wrap",
+              alignItems: "center",
+              mb: 2,
+            }}
+          >
+            <FormControl sx={{ minWidth: 220 }} size="small">
+              <InputLabel>Algorithm</InputLabel>
+
+              <Select
+                value={algorithm}
+                label="Algorithm"
+                disabled={isRunning}
+                onChange={(e) => {
+                  const nextAlgorithm = e.target.value as "nqueens" | "maze";
+                  setAlgorithm(nextAlgorithm);
+                  setStatus("Choose an algorithm and press Run.");
+                  setStepIndex(0);
+                  setTotalSteps(0);
+                  setChecks(0);
+                  setBacktracks(0);
+                  setQueenSteps([]);
+                  setMazeSteps([]);
+                }}
+              >
+                <MenuItem value="nqueens">N-Queens</MenuItem>
+                <MenuItem value="maze">Maze Solver</MenuItem>
+              </Select>
+            </FormControl>
+
+            <Button
+              variant="contained"
+              disabled={isRunning}
+              onClick={algorithm === "nqueens" ? runNQueens : runMazeSolver}
+            >
+              Run {algorithm === "nqueens" ? "N-Queens" : "Maze Solver"}
             </Button>
-          )}
 
-          <Button variant="outlined" disabled={!activeSteps.length || (isRunning && !isPaused)} onClick={stepBackward}>
-            Step Backward
-          </Button>
+            {isRunning && (
+              <Button variant="contained" color="secondary" onClick={togglePause}>
+                {isPaused ? "Resume" : "Pause"}
+              </Button>
+            )}
 
-          <Button variant="outlined" disabled={isRunning && !isPaused} onClick={stepForward}>
-            Step Forward
-          </Button>
+            <Button
+              variant="outlined"
+              disabled={!activeSteps.length || (isRunning && !isPaused)}
+              onClick={stepBackward}
+            >
+              Step Backward
+            </Button>
 
-          <Button variant="outlined" onClick={() => setDrawerOpen(true)}>
-            Explanation
-          </Button>
+            <Button
+              variant="outlined"
+              disabled={isRunning && !isPaused}
+              onClick={stepForward}
+            >
+              Step Forward
+            </Button>
 
-          <Button variant="outlined" onClick={algorithm === "nqueens" ? reset : resetMaze}>
-            Reset
-          </Button>
-        </Box>
+            <Button variant="outlined" onClick={() => setDrawerOpen(true)}>
+              Explanation
+            </Button>
 
-        <Typography>Board Size: {size}</Typography>
-        <Slider
-          value={size}
-          min={4}
-          max={12}
-          step={1}
-          disabled={isRunning || algorithm === "maze"}
-          onChange={(_, value) => {
-            const newSize = value as number;
-            setSize(newSize);
-            setBoard(createBoard(newSize));
-            setCurrentStep(null);
-            setStepIndex(0);
-            setTotalSteps(0);
-            setQueenSteps([]);
-          }}
-        />
+            <Button
+              variant="outlined"
+              color="error"
+              onClick={algorithm === "nqueens" ? reset : resetMaze}
+            >
+              Reset
+            </Button>
+          </Stack>
 
-        <Typography sx={{ mt: 2 }}>Speed: {speed}ms</Typography>
-        <Slider
-          value={speed}
-          min={20}
-          max={500}
-          step={20}
-          disabled={isRunning && !isPaused}
-          onChange={(_, value) => setSpeed(value as number)}
-        />
+          <Divider sx={{ my: 2 }} />
 
-        <Stack sx={{ flexDirection: "row", gap: 1, flexWrap: "wrap", mt: 2 }}>
-          <Chip label={`Step: ${stepIndex}/${totalSteps}`} />
-          <Chip label={algorithm === "nqueens" ? `Checks: ${checks}` : `Visited: ${checks}`} />
-          <Chip label={`Backtracks: ${backtracks}`} />
-        </Stack>
+          <Stack sx={{ flexDirection: { xs: "column", md: "row" }, gap: 3 }}>
+            <Box sx={{ flex: 1 }}>
+              <Typography gutterBottom sx={{ fontWeight: 700 }}>
+                Board Size: {size}
+              </Typography>
+              <Slider
+                value={size}
+                min={4}
+                max={12}
+                step={1}
+                disabled={isRunning || algorithm === "maze"}
+                onChange={(_, value) => {
+                  const newSize = value as number;
+                  setSize(newSize);
+                  setBoard(createBoard(newSize));
+                  setCurrentStep(null);
+                  setStepIndex(0);
+                  setTotalSteps(0);
+                  setQueenSteps([]);
+                }}
+              />
+            </Box>
 
-        <Alert severity={status.startsWith("No path") ? "warning" : "info"} sx={{ mt: 2 }}>
-          {status}
-        </Alert>
+            <Box sx={{ flex: 1 }}>
+              <Typography gutterBottom sx={{ fontWeight: 700 }}>
+                Speed: {speed}ms
+              </Typography>
+              <Slider
+                value={speed}
+                min={20}
+                max={500}
+                step={20}
+                disabled={isRunning && !isPaused}
+                onChange={(_, value) => setSpeed(value as number)}
+              />
+            </Box>
+          </Stack>
 
-        <AlgorithmInfoCard info={backtrackingInfo[algorithm]} />
+          <Stack sx={{ flexDirection: "row", gap: 1, flexWrap: "wrap", mt: 2 }}>
+            <Chip label={`Step: ${stepIndex}/${totalSteps}`} variant="outlined" />
+            <Chip
+              label={algorithm === "nqueens" ? `Checks: ${checks}` : `Visited: ${checks}`}
+              variant="outlined"
+            />
+            <Chip label={`Backtracks: ${backtracks}`} variant="outlined" />
+          </Stack>
+
+          <Alert severity={status.startsWith("No path") ? "warning" : "info"} sx={{ mt: 2 }}>
+            {status}
+          </Alert>
+        </CardContent>
+      </Card>
+
+      <Paper elevation={0}
+          sx={{
+            mt: 3,
+            p: { xs: 2, md: 3 },
+            borderRadius: 5,
+            border: "1px solid",
+            borderColor: "divider",
+            bgcolor: "background.paper",
+          }}>
+        {algorithm === "nqueens" ? (
+          <NQueensBoard board={board} currentStep={currentStep} />
+        ) : (
+          <MazeBoard maze={maze} onCellClick={handleMazeCellClick} />
+        )}
       </Paper>
 
-      {algorithm === "nqueens" ? (
-        <NQueensBoard board={board} currentStep={currentStep} />
-      ) : (
-        <MazeBoard maze={maze} onCellClick={handleMazeCellClick} />
-      )}
+      <Paper elevation={0}
+          sx={{
+            mt: 3,
+            p: { xs: 2, md: 3 },
+            borderRadius: 5,
+            border: "1px solid",
+            borderColor: "divider",
+            bgcolor: "background.paper",
+          }}>
+        <AlgorithmInfoCard info={backtrackingInfo[algorithm]} />
+      </Paper>
 
       <AlgorithmExplanationDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} info={backtrackingInfo[algorithm]} />
     </Box>
